@@ -14,5 +14,13 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/apto/keydb/issues"
+  },
+  "dependencies": {
+    "uuid64": "*",
+    "funql": "*",
+    "q": "~0.9.7",
+    "underscore": "~1.5.2",
+    "mysql": "~2.0.0-alpha9",
+    "errman": "*"
   }
 }
