@@ -1,0 +1,19 @@
+{
+  "name": "keydb",
+  "repo": "apto/keydb",
+  "description": "Key/value data/query API.",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "microjs/q": "*",
+  },
+  "development": {},
+  "license": "MIT",
+  "scripts": [
+    "client.js",
+    "lib/api.js",
+    "lib/emitter.js",
+    "lib/util.js",
+    "lib/stream.js"
+  ]
+}
