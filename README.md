@@ -24,7 +24,7 @@ db.send({op: 'set', key: 'foo', value: 'bar'})
   })
   .then(function () {
     // use funql syntax to query
-    return db.query("eq(key,'foo')").promise();
+    return db.query("eq(key,'foo')");
   })
   .then(function (items) {
     // items[0].key === "bar"
