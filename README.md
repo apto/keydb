@@ -27,7 +27,7 @@ db.send({op: 'set', key: 'foo', value: 'bar'})
     return db.query("eq(key,'foo')");
   })
   .then(function (items) {
-    // items[0].key === "bar"
+    // items[0].key === "foo"
     // items[0].value === "bar"
   })
   .finally(function () {
