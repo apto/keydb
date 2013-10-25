@@ -10,7 +10,7 @@
   "development": {},
   "license": "MIT",
   "scripts": [
-    "client.js",
+    "index-client.js",
     "lib/api.js",
     "lib/emitter.js",
     "lib/util.js",

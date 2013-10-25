@@ -2,9 +2,9 @@
   "name": "keydb",
   "version": "0.0.0",
   "description": "Key/value data/query API to use on the server and in the browser.",
-  "main": "index.js",
+  "main": "index-server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha test/*.js -R spec"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,9 @@
     "underscore": "~1.5.2",
     "mysql": "~2.0.0-alpha9",
     "errman": "*"
+  },
+  "devDependencies": {
+    "chai": "~1.8.1",
+    "mocha": "~1.13.0"
   }
 }

@@ -1,0 +1,4 @@
+language: node_js
+node_js:
+  - 0.10
+env: KEYDB_MODE=UNSAFE KEYDB_DRIVERS_MYSQL_USERNAME=travis
