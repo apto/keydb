@@ -13,6 +13,9 @@ npm install keydb
 
 ## Usage
 
+Writes through KeyDB are done with the `send` method, and reads are done with
+the `query` method.
+
 ```js
 var keydb = require('keydb');
 
@@ -31,6 +34,33 @@ db.send({op: 'set', key: 'foo', value: 'bar'})
   .then(function (items) {
     // items[0].key === "foo"
     // items[0].value === "bar"
+  })
+  .finally(function () {
+    // disconnect
+    return db.end();
+  });
+```
+
+You can use `set` sugar instead of the `send` method for a set operation, and
+you can use `get` sugar to retrieve a single key:
+
+```js
+var keydb = require('keydb');
+
+// mysql driver assumes localhost/3306/root
+var db = keydb('mysql', 'test');
+
+// upsert
+db.set('foo', 'bar')
+  .then(function () {
+    // foo is now "bar"
+  })
+  .then(function () {
+    return db.get('foo')
+  })
+  .then(function (item) {
+    // items.key === "foo"
+    // items.value === "bar"
   })
   .finally(function () {
     // disconnect
