@@ -12,7 +12,7 @@ try {
 var doPromise = function (promise) {
   return function (done) {
     if (typeof promise === 'function') {
-      promise = promise();
+      promise = promise(done);
     }
     promise.then(function () {
       done();
@@ -41,6 +41,15 @@ var testDriver = function (type) {
             expect(item.version).to.equal(version);
           });
       }));
+      it('should fail to create a duplicate item', function (done) {
+        db.set('users/joe', joeValueA, {ifVersion: null})
+        .then(function () {
+          done(new Error('db allowed creating a duplicate item'));
+        }, function (err) {
+          expect(err.code).to.equal('create_conflict');
+          done();
+        });
+      });
     });
   });
 };
