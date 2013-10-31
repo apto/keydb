@@ -13,57 +13,39 @@ npm install keydb
 
 ## Usage
 
-Writes through KeyDB are done with the `send` method, and reads are done with
-the `query` method.
+By default, KeyDB is a middleware stack that does nothing. At a minimum, you
+must provide it with a data source. A data source is just a function that
+returns data.
 
 ```js
 var keydb = require('keydb');
 
-// mysql driver assumes localhost/3306/root
-var db = keydb('mysql', 'test');
+var db = keydb();
 
-// upsert
-db.send({op: 'set', key: 'foo', value: 'bar'})
-  .then(function () {
-    // foo is now "bar"
-  })
-  .then(function () {
-    // use funql syntax to query
-    return db.query("eq(key,'foo')");
-  })
-  .then(function (items) {
-    // items[0].key === "foo"
-    // items[0].value === "bar"
-  })
-  .finally(function () {
-    // disconnect
-    return db.end();
-  });
+db.source(function (msg) {
+  return msg;
+});
+
+console.log(db("Hello, World!"));
 ```
 
-You can use `set` sugar instead of the `send` method for a set operation, and
-you can use `get` sugar to retrieve a single key:
+The above database will simply echo the message sent to it. That's not very
+useful. To do something more useful, use the included drivers.
 
 ```js
 var keydb = require('keydb');
 
-// mysql driver assumes localhost/3306/root
-var db = keydb('mysql', 'test');
+var db = keydb();
 
-// upsert
-db.set('foo', 'bar')
+db.driver(keydb.drivers.upsert);
+db.driver(keydb.drivers.version);
+db.driver(keydb.drivers.mysql);
+
+db({op: 'set', key: 'users/joe', value: {fn: 'Joe'}})
   .then(function () {
-    // foo is now "bar"
+    return db({op: 'get', key: 'users/joe'});
   })
-  .then(function () {
-    return db.get('foo')
+  .then(function (msg) {
+    console.log(msg);
   })
-  .then(function (item) {
-    // item.key === "foo"
-    // item.value === "bar"
-  })
-  .finally(function () {
-    // disconnect
-    return db.end();
-  });
 ```
