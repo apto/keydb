@@ -20,6 +20,23 @@ var doPromise = function (promise) {
   };
 };
 
+describe('mysql test', function () {
+  var db = keydb();
+  db.driver(keydb.drivers.upsert);
+  db.driver(keydb.drivers.version);
+  db.driver(keydb.drivers.mysql);
+  var joeValueA = {firstName: 'Joe'};
+  it('should set and get', doPromise(function () {
+    return db({op: 'set', key: 'users/joe', value: joeValueA})
+      .then(function () {
+        return db({op: 'get', key: 'users/joe'});
+      })
+      .then(function (msg) {
+        expect(msg.value).to.eql(joeValueA);
+      });
+  }));
+});
+
 // var testDriver = function (type) {
 //   describe('driver:' + type, function () {
 //     // var db = keydb(type, 'test');
