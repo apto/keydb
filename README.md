@@ -59,8 +59,8 @@ db.set('foo', 'bar')
     return db.get('foo')
   })
   .then(function (item) {
-    // items.key === "foo"
-    // items.value === "bar"
+    // item.key === "foo"
+    // item.value === "bar"
   })
   .finally(function () {
     // disconnect
