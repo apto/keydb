@@ -35,6 +35,15 @@ describe('mysql test', function () {
         expect(msg.value).to.eql(joeValueA);
       });
   }));
+
+  it('should throw 404 error', function (done) {
+    var p = db({op: 'get', key: 'users/joewho'});
+    p.fail(function (msg) {
+      expect(msg.status).to.eql(404);
+      expect(msg.message).to.eql('Not found: users/joewho');
+      done();
+    });
+  });
 });
 
 // var testDriver = function (type) {
