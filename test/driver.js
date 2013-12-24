@@ -1,7 +1,8 @@
 /* global describe, it */
 /* jshint expr: true */
 
-var expect = require('chai').expect;
+var chai = require('chai');
+var expect = chai.expect;
 var keydb;
 try {
   keydb = require('../');
@@ -9,16 +10,19 @@ try {
   keydb = require('keydb');
 }
 
-var doPromise = function (promise) {
-  return function (done) {
-    if (typeof promise === 'function') {
-      promise = promise(done);
-    }
-    promise.then(function () {
-      done();
-    }, done);
-  };
-};
+require('mocha-as-promised')();
+chai.use(require('chai-as-promised'));
+
+// var doPromise = function (promise) {
+//   return function (done) {
+//     if (typeof promise === 'function') {
+//       promise = promise(done);
+//     }
+//     promise.then(function () {
+//       done();
+//     }, done);
+//   };
+// };
 
 describe('mysql test', function () {
   var db = keydb();
@@ -26,15 +30,27 @@ describe('mysql test', function () {
   db.driver(keydb.drivers.version);
   db.driver(keydb.drivers.mysql);
   var joeValueA = {firstName: 'Joe'};
-  it('should set and get', doPromise(function () {
-    return db({op: 'set', key: 'users/joe', value: joeValueA})
-      .then(function () {
-        return db({op: 'get', key: 'users/joe'});
-      })
+  it('should set', function () {
+    return db({op: 'set', key: 'users/joe', value: joeValueA});
+  });
+  it('should get', function () {
+    return db({op: 'get', key: 'users/joe'})
       .then(function (msg) {
         expect(msg.value).to.eql(joeValueA);
       });
-  }));
+  });
+  it('should not get missing', function () {
+    return expect(db({op: 'get', key: 'users/mary'})).to.be.rejectedWith(keydb.error.NotFound);
+  });
+  it('should delete', function () {
+    return db({op: 'delete', key: 'users/joe'})
+      .then(function () {
+        return expect(db({op: 'get', key: 'users/joe'})).to.be.rejectedWith(keydb.error.NotFound);
+      });
+  });
+  it('should not delete missing', function () {
+    return expect(db({op: 'delete', key: 'users/mary'})).to.be.rejectedWith(keydb.error.NotFound);
+  });
 });
 
 // var testDriver = function (type) {
