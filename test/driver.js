@@ -40,7 +40,13 @@ describe('mysql test', function () {
       });
   });
   it('should not get missing', function () {
-    return expect(db({op: 'get', key: 'users/mary'})).to.be.rejectedWith(keydb.error.NotFound);
+    return expect(db({op: 'get', key: 'users/nobody'})).to.be.rejectedWith(keydb.error.NotFound);
+  });
+  it('should throw 404 on get missing', function () {
+    return db({op: 'get', key: 'users/nobody'})
+      .fail(function (err) {
+        expect(err.status).to.equal(404);
+      });
   });
   it('should delete', function () {
     return db({op: 'delete', key: 'users/joe'})
