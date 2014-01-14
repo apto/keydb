@@ -9,19 +9,28 @@ require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
 
 describe('mysql key/value driver test', function () {
-  var db = keydb();
-  db.driver(keydb.drivers.kvMysql);
+  var db = keydb('kv-mysql', {database: 'test'});
   var joeValueA = {firstName: 'Joe'};
+  var maryValue = {firstName: 'Mary'};
   before(function () {
     return db({op: 'delete-database'});
   });
   it('should set', function () {
     return db({op: 'set', key: 'users/joe', value: joeValueA});
   });
+  it('should set with sugar', function () {
+    return db.set('users/mary', maryValue);
+  });
   it('should get', function () {
     return db({op: 'get', key: 'users/joe'})
       .then(function (msg) {
         expect(msg.value).to.eql(joeValueA);
+      });
+  });
+  it('should get with sugar', function () {
+    return db.get('users/mary')
+      .then(function (msg) {
+        expect(msg.value).to.eql(maryValue);
       });
   });
   it('should not get missing', function () {
@@ -39,8 +48,14 @@ describe('mysql key/value driver test', function () {
         return expect(db({op: 'get', key: 'users/joe'})).to.be.rejectedWith(keydb.error.NotFound);
       });
   });
+  it('should delete with sugar', function () {
+    return db.delete('users/mary')
+      .then(function () {
+        return expect(db({op: 'get', key: 'users/mary'})).to.be.rejectedWith(keydb.error.NotFound);
+      });
+  });
   it('should not delete missing', function () {
-    return expect(db({op: 'delete', key: 'users/mary'})).to.be.rejectedWith(keydb.error.NotFound);
+    return expect(db({op: 'delete', key: 'users/nobody'})).to.be.rejectedWith(keydb.error.NotFound);
   });
 });
 
