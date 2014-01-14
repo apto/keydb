@@ -3,33 +3,18 @@
 
 var chai = require('chai');
 var expect = chai.expect;
-var keydb;
-try {
-  keydb = require('../');
-} catch (err) {
-  keydb = require('keydb');
-}
+var keydb = require('keydb');
 
 require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
 
-// var doPromise = function (promise) {
-//   return function (done) {
-//     if (typeof promise === 'function') {
-//       promise = promise(done);
-//     }
-//     promise.then(function () {
-//       done();
-//     }, done);
-//   };
-// };
-
-describe('mysql test', function () {
+describe('mysql key/value driver test', function () {
   var db = keydb();
-  db.driver(keydb.drivers.upsert);
-  db.driver(keydb.drivers.version);
-  db.driver(keydb.drivers.mysql);
+  db.driver(keydb.drivers.kvMysql);
   var joeValueA = {firstName: 'Joe'};
+  before(function () {
+    return db({op: 'delete-database'});
+  });
   it('should set', function () {
     return db({op: 'set', key: 'users/joe', value: joeValueA});
   });

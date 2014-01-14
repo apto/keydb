@@ -7,5 +7,7 @@ keydb.driver('syncKeys', require('./lib/drivers/sync-keys'));
 keydb.driver('mysql', require('./lib/drivers/mysql'));
 keydb.driver('upsert', require('./lib/drivers/upsert'));
 keydb.driver('version', require('./lib/drivers/version'));
+keydb.driver('table', require('./lib/drivers/table'));
+keydb.driver('kvMysql', require('./lib/drivers/kv-mysql'));
 
 module.exports = keydb;
