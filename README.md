@@ -3,7 +3,7 @@ keydb
 
 [![Build Status](https://secure.travis-ci.org/apto/keydb.png)](http://travis-ci.org/apto/keydb)
 
-Key/value data/query API to use on the server or in the browser.
+Build data APIs using the middleware concept.
 
 ## Installation
 
