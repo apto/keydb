@@ -19,3 +19,5 @@ components
 
 .idea/
 *.iml
+
+!/test/node_modules
