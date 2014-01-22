@@ -29,8 +29,8 @@ describe('mysql key/value driver test', function () {
   });
   it('should get with sugar', function () {
     return db.get('users/mary')
-      .then(function (msg) {
-        expect(msg.value).to.eql(maryValue);
+      .then(function (value) {
+        expect(value).to.eql(maryValue);
       });
   });
   it('should not get missing', function () {
