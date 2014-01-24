@@ -8,31 +8,31 @@ chai.use(require('chai-as-promised'));
 describe('mount driver test', function () {
   var db;
 
-  var memUsers = keydb('memory');
-  var memBooks = keydb('memory');
+  var syncMemUsers = keydb('sync-memory');
+  var syncMemBooks = keydb('sync-memory');
   it('should put users into users', function () {
-    db = keydb('mount-keys');
-    db.mount('users/', memUsers);
-    db.mount('books/', memBooks);
+    db = keydb('sync-mount-keys');
+    db.mount('users/', syncMemUsers);
+    db.mount('books/', syncMemBooks);
 
     db({op: 'set', key: 'users/joe', value: {firstName: 'Joe'}});
   });
   it('should get users from users', function () {
-    var user = memUsers({op: 'get', key: 'joe'});
+    var user = syncMemUsers({op: 'get', key: 'joe'});
     expect(user.value).to.eql({firstName: 'Joe'});
   });
   it('should put books into users', function () {
     db({op: 'set', key: 'books/dune', value: {author: 'Frank'}});
   });
   it('should get books from books', function () {
-    var book = memBooks({op: 'get', key: 'dune'});
+    var book = syncMemBooks({op: 'get', key: 'dune'});
     expect(book.value).to.eql({author: 'Frank'});
   });
 
-  var asyncMemUsers = keydb('async-memory');
-  var asyncMemBooks = keydb('async-memory');
+  var asyncMemUsers = keydb('memory');
+  var asyncMemBooks = keydb('memory');
   it('should put async users into users', function () {
-    db = keydb('async-mount-keys');
+    db = keydb('mount-keys');
     db.mount('users/', asyncMemUsers);
     db.mount('books/', asyncMemBooks);
 
@@ -56,30 +56,38 @@ describe('mount driver test', function () {
     expect(bookValue).to.eventually.eql({author: 'Frank'});
   });
 
-  // var kvMysql = keydb('kv-mysql', {
-  //   database: 'test',
-  //   tables: {
-  //     user: {
-  //       properties: {
-  //         user_id: {
-  //           type: 'string',
-  //           maxLength: 100
-  //         },
-  //         first_name: {
-  //           type: 'string',
-  //           maxLength: 100
-  //         },
-  //         last_name: {
-  //           type: 'string',
-  //           maxLength: 100
-  //         }
-  //       },
-  //       primaryKey: 'user_id'
-  //     }
-  //   }
-  // });
-  // it('should put users into mysql', function () {
-  //   db = keydb('async-mount-keys');
-  //   db.mount('users/', kvMysql, {msg: {table: 'user'}});
-  // });
+  var kvMysql = keydb('kv-mysql', {
+    database: 'test',
+    tables: {
+      user: {
+        properties: {
+          user_id: {
+            type: 'string',
+            maxLength: 100
+          },
+          first_name: {
+            type: 'string',
+            maxLength: 100
+          },
+          last_name: {
+            type: 'string',
+            maxLength: 100
+          }
+        },
+        primaryKey: 'user_id'
+      }
+    }
+  });
+  it('should put user into mysql', function () {
+    db = keydb('mount-keys');
+    db.mount('users/', kvMysql, {msg: {table: 'user'}});
+    return db({op: 'set', key: 'users/joe', value: {first_name: 'Joe', last_name: 'Foo'}});
+  });
+  it('should get user from mysql', function () {
+    var userValue = db({op: 'get', key: 'users/joe'})
+      .then(function (msg) {
+        return msg.value;
+      });
+    return expect(userValue).to.eventually.eql({first_name: 'Joe', last_name: 'Foo'});
+  });
 });
