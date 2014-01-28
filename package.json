@@ -1,6 +1,6 @@
 {
   "name": "keydb",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Key/value data/query API to use on the server and in the browser.",
   "main": "index-server.js",
   "scripts": {
