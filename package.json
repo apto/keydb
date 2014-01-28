@@ -22,7 +22,8 @@
     "underscore": "~1.5.2",
     "mysql": "~2.0.0-alpha9",
     "errman": "*",
-    "binary-search": "~1.1.1"
+    "binary-search": "~1.1.1",
+    "aws-sdk": "~2.0.0-rc8"
   },
   "devDependencies": {
     "chai": "~1.8.1",
