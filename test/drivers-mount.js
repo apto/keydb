@@ -90,4 +90,26 @@ describe('mount driver test', function () {
       });
     return expect(userValue).to.eventually.eql({first_name: 'Joe', last_name: 'Foo'});
   });
+
+  var tree = keydb('tree-memory');
+  it('should create book collection in tree', function () {
+    db = keydb('mount-keys');
+    db.mount('tree/', tree);
+    return db({op: 'set', key: 'tree/books', type: 'collection'});
+  });
+  it('should create book in tree', function () {
+    return db({op: 'set', key: 'tree/books/dune', value: {title: 'Dune'}});
+  });
+  it('should get book from tree', function () {
+    var promise = db({op: 'get', key: 'tree/books/dune'}).then(function (msg) {
+      return msg.value;
+    });
+    return expect(promise).to.eventually.eql({title: 'Dune'});
+  });
+  it('should get collection from tree', function () {
+    return db({op: 'get', key: 'tree/books'}).then(function (msg) {
+      expect(msg.value.length).to.equal(1);
+      expect(msg.value).to.eql([{key: 'tree/books/dune'}]);
+    });
+  });
 });
