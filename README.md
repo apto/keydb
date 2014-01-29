@@ -26,7 +26,9 @@ db.source(function (msg) {
   return msg;
 });
 
-console.log(db("Hello, World!"));
+db("Hello, World!").then(function (msg) {
+  console.log(msg);
+});
 ```
 
 The above database will simply echo the message sent to it. That's not very
