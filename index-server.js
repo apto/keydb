@@ -16,5 +16,6 @@ keydb.driver('kv-mysql', require('./lib/drivers/kv-mysql'));
 keydb.driver('mount-keys', require('./lib/drivers/mount-keys'));
 keydb.driver('sync-mount-keys', require('./lib/drivers/sync-mount-keys'));
 keydb.driver('media', require('./lib/drivers/media'));
+keydb.driver('buffer', require('./lib/drivers/buffer'));
 
 module.exports = keydb;

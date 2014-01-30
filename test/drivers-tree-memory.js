@@ -1,6 +1,9 @@
 var chai = require('chai');
 var expect = chai.expect;
 var keydb = require('keydb');
+var utils = keydb.utils;
+var fs = require('fs');
+var Path = require('path');
 
 require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
@@ -42,8 +45,37 @@ describe('tree memory driver test', function () {
     });
   });
   it('should get a media value on a collection', function () {
+    // returns whatever driver wants to return
     return db({op: 'get-media', key: 'files/foo.txt'}).then(function (msg) {
+      expect(msg.value.toString()).to.eql('Hello, world!');
+    });
+  });
+  it('should get a media value as buffer on a collection', function () {
+    return db({op: 'get-buffer', key: 'files/foo.txt'}).then(function (msg) {
+      expect(msg.value.toString()).to.eql('Hello, world!');
+    });
+  });
+  it('should get a media value as string on a collection', function () {
+    return db({op: 'get-string', key: 'files/foo.txt'}).then(function (msg) {
       expect(msg.value).to.eql('Hello, world!');
+    });
+  });
+  it('should get a media value as stream on a collection', function () {
+    return db({op: 'get-stream', key: 'files/foo.txt'}).then(function (msg) {
+      return utils.streamToStringPromise(msg.value)
+        .then(function (value) {
+          expect(value).to.eql('Hello, world!');
+        });
+    });
+  });
+  it('should set a media value on a collection using a stream', function () {
+    var filePath = Path.join(__dirname, 'fixtures/hello.txt');
+    var file = fs.createReadStream(filePath);
+    return db({op: 'set', key: 'files/hello.txt', mediaType: 'text/plain', value: file});
+  });
+  it('should get the file media value as string', function () {
+    return db({op: 'get-string', key: 'files/hello.txt'}).then(function (msg) {
+      expect(msg.value).to.eql('hello');
     });
   });
 });
