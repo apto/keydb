@@ -36,4 +36,14 @@ describe('tree memory driver test', function () {
       ]);
     });
   });
+  it('should set a media value on a collection', function () {
+    return db({op: 'set', key: 'files', type: 'collection', value: {}}).then(function () {
+      return db({op: 'set', key: 'files/foo.txt', value: 'Hello, world!', mediaType: 'text/plain'});
+    });
+  });
+  it('should get a media value on a collection', function () {
+    return db({op: 'get-media', key: 'files/foo.txt'}).then(function (msg) {
+      expect(msg.value).to.eql('Hello, world!');
+    });
+  });
 });
