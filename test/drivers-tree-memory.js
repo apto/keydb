@@ -17,7 +17,7 @@ describe('tree memory driver test', function () {
     var promise = db({op: 'get', key: 'foo'}).then(function (msg) {
       return msg.value;
     });
-    expect(promise).to.eventually.eql('bar');
+    return expect(promise).to.eventually.eql('bar');
   });
   it('should create a collection', function () {
     return db({op: 'set', key: 'users', type: 'collection', value: {}});
@@ -77,5 +77,21 @@ describe('tree memory driver test', function () {
     return db({op: 'get-string', key: 'files/hello.txt'}).then(function (msg) {
       expect(msg.value).to.eql('hello');
     });
+  });
+  it('should get the meta for a collection', function () {
+    return db({op: 'meta', key: 'files'})
+      .then(function (msg) {
+        expect(msg.key).to.equal('files');
+        expect(msg.type).to.equal('collection');
+        expect(msg.value).to.equal(undefined);
+      });
+  });
+  it('should get the meta for a file', function () {
+    return db({op: 'meta', key: 'files/hello.txt'})
+      .then(function (msg) {
+        expect(msg.key).to.equal('files/hello.txt');
+        expect(msg.type).to.not.equal('collection');
+        expect(msg.value).to.equal(undefined);
+      });
   });
 });

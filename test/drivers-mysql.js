@@ -74,11 +74,10 @@ var testDatabase = function (type) {
     it('should not find deleted', function () {
       var promise = db({op: 'query', table: 'user',
         attributes: ['user_id', 'first_name', 'last_name'],
-        filters: {user_id: 'joe'}})
-        .then(function (msg) {
-          return msg.items[0];
+        filters: {user_id: 'joe'}}).then(function (msg) {
+          return msg.items;
         });
-      expect(promise).to.be.rejectedWith(keydb.error.NotFound);
+      return expect(promise).to.eventually.eql([]);
     });
   });
 };
