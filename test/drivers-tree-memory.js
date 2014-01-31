@@ -39,6 +39,42 @@ describe('tree memory driver test', function () {
       ]);
     });
   });
+  it('should copy a value on a collection', function () {
+    return db({op: 'copy', key: 'users/joe', toKey: 'users/joseph'});
+  });
+  it('should get copied value', function () {
+    return db({op: 'get', key: 'users/joseph'})
+      .then(function (msg) {
+        expect(msg.value).to.eql({fn: 'Joe'});
+      });
+  });
+  it('should move a value on a collection', function () {
+    return db({op: 'move', key: 'users/joseph', toKey: 'users/jack'});
+  });
+  it('should get moved value', function () {
+    return db({op: 'get', key: 'users/jack'})
+      .then(function (msg) {
+        expect(msg.value).to.eql({fn: 'Joe'});
+      });
+  });
+  it('should not find moved value at original location', function () {
+    return expect(db({op: 'get', key: 'users/joseph'})).to.be.rejectedWith(keydb.error.NotFound);
+  });
+  it('should copy a collection', function () {
+    return db({op: 'copy', key: 'users', toKey: 'losers'});
+  });
+  it('should find value at new collection', function () {
+    return db({op: 'get', key: 'losers/jack'})
+      .then(function (msg) {
+        expect(msg.value).to.eql({fn: 'Joe'});
+      });
+  });
+  it('should delete a value from a collection', function () {
+    return db({op: 'delete', key: 'users/joe'});
+  });
+  it('should not find a deleted value on a collection', function () {
+    return expect(db({op: 'get', key: 'users/joe'})).to.be.rejectedWith(keydb.error.NotFound);
+  });
   it('should set a media value on a collection', function () {
     return db({op: 'set', key: 'files', type: 'collection', value: {}}).then(function () {
       return db({op: 'set', key: 'files/foo.txt', value: 'Hello, world!', mediaType: 'text/plain'});
