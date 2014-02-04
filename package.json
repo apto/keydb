@@ -24,7 +24,8 @@
     "errman": "*",
     "binary-search": "~1.1.1",
     "aws-sdk": "~2.0.0-rc8",
-    "streamifier": "~0.1.0"
+    "streamifier": "~0.1.0",
+    "jsftp": "https://github.com/sergi/jsftp/tarball/master"
   },
   "devDependencies": {
     "chai": "~1.8.1",
