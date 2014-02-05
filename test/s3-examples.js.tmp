@@ -1,0 +1,143 @@
+var fs = require('fs');
+var keydb = require('keydb');
+
+var db = keydb();
+db.driver(keydb.drivers.media);
+
+// just for initial testing the below temporarily includes hard coded credentials: 
+// (these need to be removed at some point)
+db.driver(keydb.drivers.s3, 
+  { 
+    "accessKeyId": "AKIAJCHBC5JUFSW7P7KA", 
+    "secretAccessKey": "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", 
+    "region": "us-east-1" 
+  }
+);
+
+var fileStream = fs.createReadStream('./drivers-s3.js');
+console.log('creating file from stream of drivers-s3.js');
+db({op: 'set', key: 'drivers-s3.js', value: fileStream}).then(function (result) {
+  console.log('created file testupload.txt with content of drivers-s3.js');
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to create file drivers-s3.js with content from stream: ' + err);
+});
+
+
+console.log('creating file foo with content \'bar\'');
+db({op: 'set', key: 'fooA', value: 'baz'}).then(function (result) {
+  console.log('created file foo with content bar');
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to create file foo with content bar: ' + err);
+});
+
+console.log('getting meta for file foo1');
+db({op: 'meta', key: 'foo1'}).then(function (result) {
+  console.log('got meta for file foo1');
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to get meta for foo1: ' + err);
+});
+
+console.log('getting meta for folder \'folderFromS3Test4/subfolderFromS3Test4\'');
+db({op: 'meta', key: 'folderFromS3Test4/subfolderFromS3Test4'}).then(function (result) {
+  console.log('got meta for folder \'folderFromS3Test4/subfolderFromS3Test4\'');
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to get meta for \'folderFromS3Test4/subfolderFromS3Test4\': ' + err);
+});
+
+
+console.log('getting meta for nonexistent key \'abc\'');
+db({op: 'meta', key: 'abc'}).then(function (result) {
+  console.log('Incorrectly succeeded in getting meta for non-existent key \'abc\'');
+  console.log(result);
+}).fail(function (err) {
+  console.log('Correctly failed to get meta for non-existent key \'abc\': ' + err);
+});
+
+console.log('getting file foo1');
+db({op: 'get-string', key: 'foo1'}).then(function (result) {
+  console.log('got file foo1');
+  console.log(typeof result);
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to get foo1: ' + err);
+});
+
+
+console.log('getting folder folder2');
+db({op: 'get', key: 'folder2'}).then(function (result) {
+  console.log('got folder folder2');  
+  console.log(typeof result);
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to get folder2: ' + err);
+});
+
+
+console.log('getting non-existent key abc');
+db({op: 'get', key: 'abc'}).then(function (result) {
+  console.log('Incorrectly succeeded in getting non-existent abc');
+  console.log(typeof result);
+  console.log(result);
+}).fail(function (err) {
+  console.log('Correctly failed to get non-existent abc: ' + err);
+});
+
+console.log('deleting file foo1');
+db({op: 'delete', key: 'foo1'}).then(function (result) {
+  console.log('succeeded in delete file foo');
+  console.log(typeof result);
+  console.log(result);
+}).fail(function (err) {
+  console.log('failed to delete file foo: ' + err);
+});
+
+/*
+    var promise = db({op: 'get-string', key: 'foo'}).then(function (msg) {
+      return msg.value;
+    });
+    expect(promise).to.be.rejectedWith(keydb.error.NotFound);
+*/
+
+console.log('Creating \'folderFromS3Test4/subfolderFromS3Test4\'');
+db({op: 'set', type: 'collection', key: 'folderFromS3Test4/subfolderFromS3Test4'}).then(function (result) {
+  console.log('created folder folderFromS3Test4/subfolderFromS3Test4');  
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to create folderFromS3Test4/subfolderFromS3Test4: ' + err);
+});
+
+
+console.log('Creating file \'folderFromS3Test/subfolderFromS3Test/joe\'');
+db({op: 'set', key: 'folderFromS3Test/subfolderFromS3Test/joe', value: {fn: 'Joe'}}).then(function (result) {
+  console.log('created file folderFromS3Test/subfolderFromS3Test/joe');  
+  console.log(result);
+}).fail(function (err) {
+  console.log('Failed to create file folderFromS3Test/subfolderFromS3Test/joe: ' + err);
+});
+
+  /*
+  it('should create a collection', function () {
+    return db({op: 'set', key: 'users', type: 'collection', value: {}});
+  });
+  it('should set a value on a collection', function () {
+    return db({op: 'set', key: 'users/joe', value: {fn: 'Joe'}});
+  });
+  it('should get a value on a collection', function () {
+    var promise = db({op: 'get', key: 'users/joe'}).then(function (msg) {
+      return msg.value;
+    });
+    return expect(promise).to.eventually.eql({fn: 'Joe'});
+  });
+  it('should get a list of nodes for a collection', function () {
+    return db({op: 'get', key: 'users'}).then(function (msg) {
+      expect(msg.value.length).to.equal(1);
+      expect(msg.value).to.eql([
+        {key: 'users/joe'}
+      ]);
+    });
+  });
+*/

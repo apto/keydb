@@ -6,10 +6,19 @@ require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
 
 describe('s3 driver test', function () {
-//  var db = keydb('s3');
+
   var db = keydb();
   db.driver(keydb.drivers.media);
-  db.driver(keydb.drivers.s3);
+
+  // just for initial testing the below temporarily includes hard coded credentials: 
+  // (these need to be removed at some point)
+  db.driver(keydb.drivers.s3, 
+    { 
+      "accessKeyId": "AKIAJCHBC5JUFSW7P7KA", 
+      "secretAccessKey": "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", 
+      "region": "us-east-1" 
+    }
+  );
 
 /*
   it('should set value on root', function () {
@@ -18,7 +27,7 @@ describe('s3 driver test', function () {
   });
 */  
   it('should get value on root', function () {
-    var promise = db({op: 'get', key: 'foo'});
+    var promise = db({op: 'get-string', key: 'foo'});
     promise.then(function (result) {
       console.log(typeof result);
       console.log(result);
