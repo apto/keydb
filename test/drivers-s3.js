@@ -28,7 +28,7 @@ describe('s3 driver test', function () {
 
   it('should get meta for file', function () {
     var promise = db({op: 'meta', key: 'foo'})
-    return expect(promise).to.eventually.eql({ key: 'foo' });
+    return expect(promise).to.eventually.have.property('key', 'foo');
   });
 
   it('should fail to get meta for nonexistent file \'abc\'', function () {
@@ -64,9 +64,7 @@ describe('s3 driver test', function () {
   it('should get a list of nodes for a collection', function () {
     return db({op: 'get', key: 'users'}).then(function (msg) {
       expect(msg.value.length).to.equal(1);
-      expect(msg.value).to.eql([
-        {key: 'users/joe'}
-      ]);
+      expect(msg.value[0]).to.have.property('key', 'users/joe');
     });
   });
 
