@@ -4,43 +4,34 @@ var chai = require('chai'),
     Stream = require('stream'),
     fs = require('fs'),
     Server = require('ftp-test-server'),
-    portfinder = require('portfinder');
+    _portfinder = require('portfinder'),
+    q = require('q');
 
-
+var portfinder = {
+    getPort: q.nbind(_portfinder.getPort, _portfinder)
+  };
 
 require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
 describe('ftp driver test', function () {
   var db = keydb();
-  
-  portfinder.getPort(function (err, port) {
-  
-
-    var myFtp = new Server();
-
-    myFtp.on('stdout', function (data) {
-      console.log(data);
-    });
-
-    myFtp.on('stderr', function (data) {
-      console.log('ERROR', data);
-    });
-    console.log(port);
-    myFtp.init({
-      user: "test",
-      pass: "abc",
-      port: port
-    });
-    db.driver(keydb.drivers.media);
-    db.driver(keydb.drivers.ftp, {
-      username : 'test',
-      password : 'abc',
-      port : port
-    });
-  });
   before(function () {
-    fs.writeFile("test.txt", "bar");
-    fs.writeFile("delete.txt", "this file will be deleted");
+    fs.writeFileSync("test.txt", "bar");
+    fs.writeFileSync("delete.txt", "this file will be deleted");
+    return portfinder.getPort().then(function (port) {
+      var myFtp = new Server();
+      myFtp.init({
+        user: "test",
+        pass: "abc",
+        port: port
+      });
+      db.driver(keydb.drivers.media);
+      db.driver(keydb.drivers.ftp, {
+        username : 'test',
+        password : 'abc',
+        port : port
+      });
+    });
   });
   it('should set value on foo.txt', function () {
     var st = fs.createReadStream('test.txt');
