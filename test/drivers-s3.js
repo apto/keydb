@@ -47,6 +47,28 @@ describe('s3 driver test', function () {
     expect(promise).to.be.rejectedWith(keydb.error.NotFound);
   });
 
+  // confirm that empty files are handled fine:
+  it('should set empty file on root', function () {
+    var promise = db({op: 'set', key: 'mt', value: ''});
+    return expect(promise).to.be.fulfilled;
+  });
+
+  it('should get empty file on root', function () {
+    var promise = db({op: 'get-string', key: 'mt'});
+    return expect(promise).to.eventually.eql({ key: 'mt', value: '""' });
+  });
+
+  it('should delete empty file on root', function () {
+    return db({op: 'delete', key: 'mt', value: ''});
+  });
+
+  it('should fail to get deleted empty file on root', function () {
+    var promise = db({op: 'get-string', key: 'mt'}).then(function (msg) {
+      return msg.value;
+    });
+    expect(promise).to.be.rejectedWith(keydb.error.NotFound);
+  });
+
   it('should create a collection', function () {
     return db({op: 'set', key: 'users', type: 'collection', value: {}});
   });
