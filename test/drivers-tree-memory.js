@@ -112,6 +112,7 @@ describe('tree memory driver test', function () {
   it('should get the file media value as string', function () {
     return db({op: 'get-string', key: 'files/hello.txt'}).then(function (msg) {
       expect(msg.value).to.eql('hello');
+      expect(msg.size).to.equal(5);
     });
   });
   it('should get the meta for a collection', function () {
@@ -125,6 +126,7 @@ describe('tree memory driver test', function () {
   it('should get the meta for a file', function () {
     return db({op: 'meta', key: 'files/hello.txt'})
       .then(function (msg) {
+        expect(msg.size).to.equal(5);
         expect(msg.key).to.equal('files/hello.txt');
         expect(msg.type).to.not.equal('collection');
         expect(msg.value).to.equal(undefined);
