@@ -26,13 +26,13 @@
     "aws-sdk": "~2.0.0-rc8",
     "streamifier": "~0.1.0",
     "jsftp": "https://github.com/sergi/jsftp/tarball/master",
-    "ftp-test-server": "*",
     "portfinder": "*"
   },
   "devDependencies": {
     "chai": "~1.8.1",
     "mocha": "~1.13.0",
     "mocha-as-promised": "~2.0.0",
+    "ftp-test-server": "*",
     "chai-as-promised": "~4.1.0"
   }
 }
