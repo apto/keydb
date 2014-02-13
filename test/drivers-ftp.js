@@ -35,12 +35,15 @@ describe('ftp driver test', function () {
     // Create the test directories and files
     if (!fs.existsSync(path.join(__dirname, 'fixtures/tmp'))) {
       fs.mkdirSync(path.join(__dirname, 'fixtures/tmp'));
-      fs.mkdirSync(path.join(__dirname, 'fixtures/tmp/cric'));
-      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/test.txt'), "bar");
-      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/delete.txt'), "this file will be deleted");
-      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete.txt'), "this file will be deleted");
-      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete2.txt'), "this file will be deleted");
     }
+    if (!fs.existsSync(path.join(__dirname, 'fixtures/tmp/cric'))) {
+      fs.mkdirSync(path.join(__dirname, 'fixtures/tmp/cric'));
+    }
+    fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/test.txt'), "bar");
+    fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/delete.txt'), "this file will be deleted");
+    fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete.txt'), "this file will be deleted");
+    fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete2.txt'), "this file will be deleted");
+    
     return portfinder.getPort().then(function (port) {
       var myFtp = new Server();
       myFtp.init({
