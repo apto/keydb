@@ -5,22 +5,23 @@ var chai = require('chai'),
     fs = require('fs'),
     Server = require('ftp-test-server'),
     _portfinder = require('portfinder'),
-    q = require('q');
-
+    q = require('q'),
+    path = require('path');
+console.log(path);
 q.longStackSupport = true;
-function deleteFolderRecursive(path) {
+function deleteFolderRecursive(loc) {
   var files = [];
-  if (fs.existsSync(path)) {
-    files = fs.readdirSync(path);
+  if (fs.existsSync(loc)) {
+    files = fs.readdirSync(loc);
     files.forEach(function (file, index) {
-        var curPath = path + "/" + file;
+        var curPath = loc + "/" + file;
         if (fs.statSync(curPath).isDirectory()) { // recurse
           deleteFolderRecursive(curPath);
         } else { // delete file
           fs.unlinkSync(curPath);
         }
       });
-    fs.rmdirSync(path);
+    fs.rmdirSync(loc);
   }
 }
 
@@ -33,11 +34,15 @@ chai.use(require('chai-as-promised'));
 describe('ftp driver test', function () {
   var db = keydb();
   before(function () {
-    fs.writeFileSync("test.txt", "bar");
-    fs.writeFileSync("delete.txt", "this file will be deleted");
-    fs.mkdirSync("cric");
-    fs.writeFileSync("cric/delete.txt", "this file will be deleted");
-    fs.writeFileSync("cric/delete2.txt", "this file will be deleted");
+    // Create the test directories and files
+    if (!fs.existsSync(path.join(__dirname, 'fixtures/tmp'))) {
+      fs.mkdirSync(path.join(__dirname, 'fixtures/tmp'));
+      fs.mkdirSync(path.join(__dirname, 'fixtures/tmp/cric'));
+      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/test.txt'), "bar");
+      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/delete.txt'), "this file will be deleted");
+      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete.txt'), "this file will be deleted");
+      fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete2.txt'), "this file will be deleted");
+    }
     return portfinder.getPort().then(function (port) {
       var myFtp = new Server();
       myFtp.init({
@@ -54,21 +59,21 @@ describe('ftp driver test', function () {
     });
   });
   it('should set value on foo.txt', function (done) {
-    var st = fs.createReadStream('test.txt');
-    var promise = db({op: 'set', key: 'foo.txt', value: st});
+    var st = fs.createReadStream(path.join(__dirname, 'fixtures/tmp/test.txt'));
+    var promise = db({op: 'set', key: 'test/fixtures/tmp/foo.txt', value: st});
     
     return expect(promise).to.be.fulfilled;
   });
   it('should set a directory ', function () {
-    var promise = db({op: 'set', key: 'xyz', type : "collection"});
+    var promise = db({op: 'set', key: 'test/fixtures/tmp/xyz', type : "collection"});
     return expect(promise).to.be.fulfilled;
   });
   it('should delete ', function () {
-    var promise = db({op: 'delete', key: 'delete.txt', type : "collection"});
+    var promise = db({op: 'delete', key:  'test/fixtures/tmp/delete.txt'});
     return expect(promise).to.be.fulfilled;
   });
   it('should get value on test.txt', function () {
-    var promise = db({op: 'get-string', key: 'test.txt'}).then(function (result) {
+    var promise = db({op: 'get-string', key: 'test/fixtures/tmp/test.txt'}).then(function (result) {
       return result.value;
 
     });
@@ -80,40 +85,35 @@ describe('ftp driver test', function () {
     });
   });
   it('should get the meta on foo.txt', function () {
-    var promise = db({op: 'meta', key: 'test.txt'}).then(function (result) {
+    var promise = db({op: 'meta', key: 'test/fixtures/tmp/test.txt'}).then(function (result) {
       return result.type;
     });
     return expect(promise).to.eventually.eql('file');
     
   });
   it('should move a file', function () {
-    var promise = db({op: 'move', key: 'test.txt', toKey: 'test-renamed.txt'});
+    var promise = db({op: 'move', key: 'test/fixtures/tmp/test.txt', toKey: 'test/fixtures/tmp/test-renamed.txt'});
     return expect(promise).to.be.fulfilled;
     
   });
   it('should move a directory', function () {
-    var promise = db({op: 'move', key: 'xyz', toKey: 'abc'});
+    var promise = db({op: 'move', key: 'test/fixtures/tmp/xyz', toKey: 'test/fixtures/tmp/abc'});
     return expect(promise).to.be.fulfilled;
     
   });
   it('should copy a file', function () {
-    var promise = db({op: 'copy', key: 'test-renamed.txt', toKey : 'test.txt'});
+    var promise = db({op: 'copy', key: 'test/fixtures/tmp/test-renamed.txt', toKey : 'test/fixtures/tmp/test.txt'});
     return expect(promise).to.be.fulfilled;
     
   });
 
   it('should copy a directory', function () {
-    var promise = db({op: 'copy', key: 'cric', toKey : 'sae'});
+    var promise = db({op: 'copy', key: 'test/fixtures/tmp/cric', toKey : 'test/fixtures/tmp/sae'});
     return expect(promise).to.be.fulfilled;
     
   });
 
   after(function () {
-    fs.unlinkSync("test.txt");
-    fs.unlinkSync("test-renamed.txt");
-    fs.unlinkSync("foo.txt");
-    fs.rmdirSync("abc");
-    deleteFolderRecursive("cric");
-    deleteFolderRecursive("sae");
+    deleteFolderRecursive(path.join(__dirname, 'fixtures/tmp'));
   });
 });
