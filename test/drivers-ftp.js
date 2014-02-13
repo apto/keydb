@@ -7,8 +7,6 @@ var chai = require('chai'),
     _portfinder = require('portfinder'),
     q = require('q'),
     path = require('path');
-console.log(path);
-q.longStackSupport = true;
 function deleteFolderRecursive(loc) {
   var files = [];
   if (fs.existsSync(loc)) {
