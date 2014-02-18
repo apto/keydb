@@ -58,10 +58,14 @@ describe('ftp driver test', function () {
     if (!fs.existsSync(path.join(__dirname, 'fixtures/tmp/cric'))) {
       fs.mkdirSync(path.join(__dirname, 'fixtures/tmp/cric'));
     }
+    if (!fs.existsSync(path.join(__dirname, 'fixtures/tmp/one'))) {
+      fs.mkdirSync(path.join(__dirname, 'fixtures/tmp/one'));
+    }
     fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/test.txt'), "bar");
     fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/delete.txt'), "this file will be deleted");
     fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete.txt'), "this file will be deleted");
     fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete2.txt'), "this file will be deleted");
+    fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/one/alone.txt'), "alone");
     
     return portfinder.getPort({host: 'localhost'}).then(function (port) {
       myFtp = new Server();
@@ -133,6 +137,13 @@ describe('ftp driver test', function () {
     var promise = db({op: 'copy', key: 'test/fixtures/tmp/cric', toKey : 'test/fixtures/tmp/sae'});
     return expect(promise).to.be.fulfilled;
     
+  });
+  it('should work on a directory with one file', function () {
+    var promise = db({op: 'get', key: 'test/fixtures/tmp/one'})
+      .then(function (msg) {
+        return msg.type;
+      });
+    return expect(promise).to.eventually.equal('collection');
   });
 
   after(function () {
