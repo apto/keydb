@@ -24,8 +24,26 @@ function deleteFolderRecursive(loc) {
 }
 
 var portfinder = {
-    getPort: q.nbind(_portfinder.getPort, _portfinder)
-  };
+  getPort: q.nbind(_portfinder.getPort, _portfinder)
+};
+
+var wait = function (ms) {
+  return q.promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
+};
+
+var waitForConnect = function (port) {
+  return q.promise(function (resolve) {
+    var net = require('net');
+    var client = net.connect({port: port}, resolve);
+    client.on('error', function (err) {
+      wait(25).then(function () {
+        waitForConnect(port).then(resolve);
+      });
+    });
+  });
+};
 
 require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
@@ -58,9 +76,11 @@ describe('ftp driver test', function () {
         password : 'abc',
         port : port
       });
+      return waitForConnect(port);
     });
   });
   it('should set value on foo.txt', function (done) {
+
     var st = fs.createReadStream(path.join(__dirname, 'fixtures/tmp/test.txt'));
     var promise = db({op: 'set', key: 'test/fixtures/tmp/foo.txt', value: st});
     
