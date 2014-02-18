@@ -31,6 +31,7 @@ require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
 describe('ftp driver test', function () {
   var db = keydb();
+  var myFtp = null;
   before(function () {
     // Create the test directories and files
     if (!fs.existsSync(path.join(__dirname, 'fixtures/tmp'))) {
@@ -44,8 +45,8 @@ describe('ftp driver test', function () {
     fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete.txt'), "this file will be deleted");
     fs.writeFileSync(path.join(__dirname, 'fixtures/tmp/cric/delete2.txt'), "this file will be deleted");
     
-    return portfinder.getPort().then(function (port) {
-      var myFtp = new Server();
+    return portfinder.getPort({host: 'localhost'}).then(function (port) {
+      myFtp = new Server();
       myFtp.init({
         user: "test",
         pass: "abc",
@@ -116,5 +117,6 @@ describe('ftp driver test', function () {
 
   after(function () {
     deleteFolderRecursive(path.join(__dirname, 'fixtures/tmp'));
+    myFtp.stop();
   });
 });
