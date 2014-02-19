@@ -9,6 +9,7 @@ keydb.driver('sync-tree-memory', require('./lib/drivers/sync-tree-memory'));
 keydb.driver('keys', require('./lib/drivers/keys'));
 keydb.driver('sync-keys', require('./lib/drivers/sync-keys'));
 keydb.driver('mysql', require('./lib/drivers/mysql'));
+keydb.driver('ftp', require('./lib/drivers/ftp'));
 keydb.driver('upsert', require('./lib/drivers/upsert'));
 keydb.driver('version', require('./lib/drivers/version'));
 keydb.driver('table', require('./lib/drivers/table'));
