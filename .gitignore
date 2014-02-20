@@ -21,3 +21,5 @@ components
 *.iml
 
 !/test/node_modules
+
+/test/fixtures/tmp

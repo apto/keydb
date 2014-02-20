@@ -4,14 +4,26 @@
 var chai = require('chai');
 var expect = chai.expect;
 var keydb = require('keydb');
+var q = require('q');
+var dynamoLocal = require('dynamo-local');
+var portfinder = require('portfinder');
+var Path = require('path');
+var fs = require('fs');
 
 require('mocha-as-promised')();
 chai.use(require('chai-as-promised'));
 
-var testDatabase = function (type) {
+//var options = { port: 8000 };
+//dynamoLocal({port: 8000, dbPath: '.'}, function (err) { /* ... */ });
+
+dynamoLocal = q.denodeify(dynamoLocal);
+var getPort = q.nbind(portfinder.getPort, portfinder);
+
+var testDatabase = function (type, ops) {
+  ops = ops || {};
   describe(type + ' driver test', function () {
     var db = keydb();
-    db.driver(keydb.drivers[type], {
+    var driverOptions = {
       database: 'test',
       tables: {
         user: {
@@ -31,10 +43,29 @@ var testDatabase = function (type) {
           },
           primaryKey: 'user_id'
         }
-      }
-    });
+      },
+      local: true
+    };
     before(function () {
-      return db({op: 'delete-database'});
+      this.timeout(5000);
+      return q(true)
+        .then(function () {
+          if (type === 'dynamo') {
+            return getPort()
+              .then(function (port) {
+                driverOptions.port = port;
+                var dbPath = Path.join(__dirname, 'fixtures/tmp');
+                if (!fs.existsSync(dbPath)) {
+                  fs.mkdir(dbPath);
+                }
+                return dynamoLocal({port: port, dbPath: dbPath});
+              });
+          }
+        })
+        .then(function () {
+          db.driver(keydb.drivers[type], driverOptions);
+          return db({op: 'delete-database'});
+        });
     });
     var joeAttrs = {
       user_id: 'joe',
@@ -68,6 +99,15 @@ var testDatabase = function (type) {
         });
       return expect(promise).to.eventually.eql(joeAttrs);
     });
+    if (ops.get) {
+      it('should get updated', function () {
+        return db({op: 'get', table: 'user', key: 'joe'})
+          .then(function (msg) {
+            expect(msg.key).to.equal('joe');
+            expect(msg.value).to.eql({first_name: 'Joe', last_name: 'Bar'});
+          });
+      });
+    }
     it('should delete', function () {
       return db({op: 'delete', table: 'user', filters: {user_id: 'joe'}});
     });
@@ -79,8 +119,25 @@ var testDatabase = function (type) {
         });
       return expect(promise).to.eventually.eql([]);
     });
+    if (ops.get) {
+      it('should not get deleted', function () {
+        return expect(db({op: 'get', table: 'user', key: 'joe'})).to.be.rejectedWith(keydb.error.NotFound);
+      });
+    }
+    if (ops.set) {
+      it('should set value', function () {
+        var promise = db({op: 'set', key: 'joe', value: {first_name: 'Joe', last_name: 'Baz'}, table: 'user'})
+          .then(function () {
+            return db({op: 'get', key: 'joe', table: 'user'});
+          })
+          .then(function (msg) {
+            return msg.value;
+          });
+        return expect(promise).to.eventually.eql({first_name: 'Joe', last_name: 'Baz'});
+      });
+    }
   });
 };
 
 testDatabase('mysql');
-//testDatabase('dynamo');
+testDatabase('dynamo', {get: true, set: true});
