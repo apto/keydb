@@ -31,6 +31,7 @@
     "mocha": "~1.13.0",
     "mocha-as-promised": "~2.0.0",
     "chai-as-promised": "~4.1.0",
-    "dynamo-local": "0.0.2"
+    "dynamo-local": "0.0.2",
+    "portfinder": "~0.2.1"
   }
 }
