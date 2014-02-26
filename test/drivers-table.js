@@ -19,8 +19,8 @@ chai.use(require('chai-as-promised'));
 dynamoLocal = q.denodeify(dynamoLocal);
 var getPort = q.nbind(portfinder.getPort, portfinder);
 
-var testDatabase = function (type, ops) {
-  ops = ops || {};
+var testDatabase = function (type, options) {
+  options = options || {};
   describe(type + ' driver test', function () {
     var db = keydb();
     var driverOptions = {
@@ -42,6 +42,24 @@ var testDatabase = function (type, ops) {
             }
           },
           primaryKey: 'user_id'
+        },
+        log: {
+          properties: {
+            user_id: {
+              type: 'string',
+              maxLength: 100
+            },
+            time_stamp: {
+              type: 'string',
+              maxLength: 100
+            },
+            action: {
+              type: 'string',
+              maxLength: 100
+            }
+          },
+          primaryKey: 'user_id',
+          rangeKey: 'time_stamp'
         }
       },
       local: true
@@ -99,7 +117,7 @@ var testDatabase = function (type, ops) {
         });
       return expect(promise).to.eventually.eql(joeAttrs);
     });
-    if (ops.get) {
+    if (options.get) {
       it('should get updated', function () {
         return db({op: 'get', table: 'user', key: 'joe'})
           .then(function (msg) {
@@ -119,12 +137,12 @@ var testDatabase = function (type, ops) {
         });
       return expect(promise).to.eventually.eql([]);
     });
-    if (ops.get) {
+    if (options.get) {
       it('should not get deleted', function () {
         return expect(db({op: 'get', table: 'user', key: 'joe'})).to.be.rejectedWith(keydb.error.NotFound);
       });
     }
-    if (ops.set) {
+    if (options.set) {
       it('should set value', function () {
         var promise = db({op: 'set', key: 'joe', value: {first_name: 'Joe', last_name: 'Baz'}, table: 'user'})
           .then(function () {
@@ -136,8 +154,20 @@ var testDatabase = function (type, ops) {
         return expect(promise).to.eventually.eql({first_name: 'Joe', last_name: 'Baz'});
       });
     }
+    if (options.range) {
+      it('should log action for user', function () {
+        return db({op: 'set', key: 'joe/2014-01-01T12:00:00Z', table: 'log', value: {action: 'login'}});
+      });
+      it('should get action for user', function () {
+        var promise = db({op: 'get', key: 'joe/2014-01-01T12:00:00Z', table: 'log'})
+          .then(function (msg) {
+            return msg.value;
+          });
+        return expect(promise).to.eventually.eql({action: 'login'});
+      });
+    }
   });
 };
 
 testDatabase('mysql');
-testDatabase('dynamo', {get: true, set: true});
+testDatabase('dynamo', {get: true, set: true, range: true});
