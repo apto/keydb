@@ -3,7 +3,22 @@ keydb
 
 [![Build Status](https://secure.travis-ci.org/apto/keydb.png)](http://travis-ci.org/apto/keydb)
 
-Build data APIs using the middleware concept.
+KeyDB is generic middleware for data.
+
+KeyDB provides the tools to create *somewhat* consistent read/write APIs to
+heterogenous data sources. The key word here is *somewhat*. KeyDB does not
+attempt to completely paper over the semantic differences of all possible data
+sources. Instead, it uses the middleware concept to have low level "sources"
+that speak the native semantics of a physical data source and higher level
+"drivers" that massage those semantics into more consistent APIs.
+
+The "key" in KeyDB refers to the desire to use key/value semantics as much as
+possible for reasons of performance, simplicity, and because it's usually a
+common denominator across data sources.
+
+An original goal of KeyDB was to provide consistent data APIs across client and
+server. For example, local storage and MySQL. Currently, the focus is on server
+APIs, but hopefully the original intent will be revisited in the future.
 
 ## Installation
 
@@ -13,8 +28,8 @@ npm install keydb
 
 ## Usage
 
-By default, KeyDB is a middleware stack that does nothing. At a minimum, you
-must provide it with a data source. A data source is just a function that
+By default, KeyDB is a middleware stack that does almost nothing. At a minimum,
+you must provide it with a data source. A data source is just a function that
 returns data.
 
 ```js
@@ -31,8 +46,26 @@ db("Hello, World!").then(function (msg) {
 });
 ```
 
-The above database will simply echo the message sent to it. That's not very
-useful. To do something more useful, use the included drivers.
+The above database will simply echo the message sent to it. Note that KeyDB
+does automatically wrap synchronous data sources in a promise API. This is the
+default behavior because it is possible to make synchronouse APIs asynchronous,
+but it is impossible to make asynchronous APIs synchronous. Some drivers take
+a synchronous option, including the default stack driver. For example:
+
+```js
+var keydb = require('keydb');
+
+var db = keydb({sync: true});
+
+db.source(function (msg) {
+  return msg;
+});
+
+console.log(db("Hello, world"));
+```
+
+Of course, the above data sources aren't very useful. To do something more
+useful, use the included drivers.
 
 ```js
 var keydb = require('keydb');
@@ -80,10 +113,14 @@ db({
 
 In the above example, an upsert driver is stacked on top of a mysql driver so
 that upsert semantics can be added to mysql without the underlying driver
-actually supporting upsert.
+actually supporting upsert. (Of course, MySQL does directly provide some
+upsert capabilities. Just pretend it doesn't.) This demonstrates the philosophy
+and use of middleware in KeyDB. Each source and driver does only what it needs
+to do. Other features are added by stacking drivers together, rather than
+making monolithic data sources or drivers.
 
 Some drivers are preconfigured stacks, and these can be easily created by their
-IDs. They may also add sugar methods.
+names. They may also add sugar methods.
 
 ```js
 var keydb = require('keydb');
