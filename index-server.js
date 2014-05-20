@@ -18,5 +18,6 @@ keydb.driver('mount-keys', require('./lib/drivers/mount-keys'));
 keydb.driver('sync-mount-keys', require('./lib/drivers/sync-mount-keys'));
 keydb.driver('media', require('./lib/drivers/media'));
 keydb.driver('buffer', require('./lib/drivers/buffer'));
+keydb.driver('s3', require('./lib/drivers/s3'));
 
 module.exports = keydb;
