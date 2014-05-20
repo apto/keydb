@@ -9,7 +9,7 @@ describe('s3 driver test', function () {
 
   var db = keydb();
   db.driver(keydb.drivers.media);
-  db.driver(keydb.drivers.s3);
+  db.driver(keydb.drivers.s3, {'bucket': 'cwohub-dev'});
 
   it('should set value on root', function () {
     var promise = db({op: 'set', key: 'foo', value: 'bar'});
@@ -97,7 +97,7 @@ describe('s3 driver test', function () {
 
   it('should create a file from a stream', function () {
     var fs = require('fs');
-    var fileStream = fs.createReadStream('./drivers-s3.js');
+    var fileStream = fs.createReadStream(__dirname + '/drivers-s3.js');
     var promise = db({op: 'set', key: 'drivers-s3.js', value: fileStream});
     return expect(promise).to.be.fulfilled;
   });
